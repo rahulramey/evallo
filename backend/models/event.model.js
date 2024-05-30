@@ -1,10 +1,22 @@
 import mongoose, {Schema} from "mongoose";
 import { isValid, parse } from "date-fns";
 
+const validDateFormat = (dateStr) => {
+    const formats = ['dd-mm-yyyy', 'mm-dd-yyyy', 'yyyy-mm-dd']
+    return formats.some(format => {
+        const parsedDate = parse(dateStr, format, new Date());
+        return isValid(parsedDate) && parse(dateStr, format, new Date()).toISOString().startsWith(parsedDate.toISOString().split('T')[0]);
+      });
+};
+
+const validTimeFormat = (time) => {
+    const formats = ['HH:mm', 'hh:mm a']
+    return formats.some((format => isValid(parse(time, format, new Date()))));
+}
 
 const eventSchema = new Schema(
     {
-        eventTitle: {
+        title: {
             type: String,
             required: [true, 'Event is required!'],
             trim: true, 
@@ -17,9 +29,9 @@ const eventSchema = new Schema(
             type: [String], 
             default: [] 
         },
-        date: { 
-            type: Date, 
-            required: true,
+        date: {
+            type: String,
+            required: [true, 'Event date is required'],
             validate: {
                 validator: validDateFormat,
                 message: 'Invalid date format. Accepted formats: dd-MM-yyyy, MM-dd-yyyy, yyyy-MM-dd'
@@ -48,15 +60,5 @@ const eventSchema = new Schema(
         }
     }
 );
-
-const validDateFormat = (date) => {
-    const formats = ['dd-MM-yyyy', 'MM-dd-yyyy', 'yyyy-MM-dd']
-    return formats.some((format => isValid(parse(date, format, new Date()))));
-};
-
-const validTimeFormat = (time) => {
-    const formats = ['HH:mm', 'hh:mm a']
-    return formats.some((format => isValid(parse(time, format, new Date()))));
-}
 
 export const Event = mongoose.model("Event", eventSchema);
