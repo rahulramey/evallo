@@ -19,3 +19,4 @@ app.use(cookieParser());
 app.use("/api/v1/events", eventRouter)
 
 export {app};
+
